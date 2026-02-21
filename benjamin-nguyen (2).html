@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benjamin Nguyen</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1e2630;
+    --gold: #4fc8a0;
+    --gold-light: #7edfc0;
+    --cream: #f0f4f8;
+    --muted: #8b9ab0;
+    --text: #cdd6e8;
+    --accent: #4fc8a0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.35s ease, width 0.2s, height 0.2s;
+    transform: translate(-50%, -50%);
+    opacity: 0.6;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 9000;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    background: rgba(10,10,10,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(79,200,160,0.12);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 3rem 4rem 4rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .hero-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.0;
+    color: var(--cream);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+
+  .hero-name em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-desc {
+    margin-top: 2rem;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #a8b8cc;
+    max-width: 380px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.6s forwards;
+  }
+
+  .hero-cta {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+
+  .btn-primary {
+    padding: 0.8rem 2rem;
+    background: var(--gold);
+    color: #0a0a0a;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(201,168,76,0.3);
+  }
+
+  .btn-ghost {
+    padding: 0.8rem 2rem;
+    border: 1px solid rgba(201,168,76,0.4);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .btn-ghost:hover {
+    background: rgba(201,168,76,0.1);
+    border-color: var(--gold);
+  }
+
+  .hero-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-graphic {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .circle-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.15);
+    animation: rotate 30s linear infinite;
+  }
+
+  .circle-ring:nth-child(1) { width: 500px; height: 500px; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-duration: 40s; }
+  .circle-ring:nth-child(2) { width: 380px; height: 380px; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-duration: 25s; animation-direction: reverse; }
+  .circle-ring:nth-child(3) { width: 260px; height: 260px; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-duration: 15s; }
+
+  .stat-card {
+    position: absolute;
+    background: var(--surface);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 1.2rem 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards;
+  }
+
+  .stat-card:nth-child(4) { top: 25%; right: 15%; animation-delay: 1s; }
+  .stat-card:nth-child(5) { bottom: 30%; left: 10%; animation-delay: 1.2s; }
+  .stat-card:nth-child(6) { top: 55%; right: 8%; animation-delay: 1.4s; }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  /* SECTIONS */
+  section {
+    padding: 6rem 0;
+    position: relative;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 3rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--cream);
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(201,168,76,0.3), transparent);
+  }
+
+  /* EXPERIENCE */
+  #experience { background: var(--surface); }
+
+  .exp-grid {
+    display: grid;
+    gap: 2px;
+  }
+
+  .exp-item {
+    background: var(--bg);
+    padding: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    border-left: 2px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .exp-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(201,168,76,0.03), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .exp-item:hover {
+    border-left-color: var(--gold);
+    background: #0f0f0f;
+  }
+
+  .exp-item:hover::before { opacity: 1; }
+
+  .exp-company {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .exp-role {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--cream);
+    margin-bottom: 1rem;
+  }
+
+  .exp-bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .exp-bullets li {
+    font-size: 0.88rem;
+    color: #a8b8cc;
+    padding-left: 1rem;
+    position: relative;
+    line-height: 1.7;
+  }
+
+  .exp-bullets li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-size: 0.7rem;
+  }
+
+  .exp-meta {
+    text-align: right;
+  }
+
+  .exp-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .exp-location {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  .exp-tag {
+    display: inline-block;
+    margin-top: 0.8rem;
+    padding: 0.2rem 0.7rem;
+    border: 1px solid rgba(201,168,76,0.3);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* EDUCATION */
+  .edu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .edu-card {
+    background: var(--surface);
+    border: 1px solid rgba(201,168,76,0.1);
+    padding: 2.5rem;
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .edu-card:hover {
+    border-color: rgba(201,168,76,0.4);
+    transform: translateY(-4px);
+  }
+
+  .edu-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 2.5rem;
+    width: 40px; height: 2px;
+    background: var(--gold);
+  }
+
+  .edu-school {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--cream);
+    margin-bottom: 0.5rem;
+  }
+
+  .edu-degree {
+    font-size: 0.88rem;
+    color: #a8b8cc;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  .edu-gpa {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.8rem;
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  .edu-gpa-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .edu-courses {
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* SKILLS */
+  #skills { background: var(--surface); }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(79,200,160,0.08);
+  }
+
+  .skill-block {
+    background: var(--bg);
+    padding: 2rem;
+    transition: background 0.3s;
+  }
+
+  .skill-block:hover { background: #0f0f0f; }
+
+  .skill-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .skill-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .skill-desc {
+    font-size: 0.83rem;
+    color: #a8b8cc;
+    line-height: 1.7;
+  }
+
+  /* INTERESTS */
+  .interests-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .interest-pill {
+    padding: 0.7rem 1.5rem;
+    border: 1px solid rgba(201,168,76,0.2);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .interest-pill::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(201,168,76,0.05);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+
+  .interest-pill:hover {
+    color: var(--gold);
+    border-color: rgba(201,168,76,0.5);
+  }
+
+  .interest-pill:hover::before { transform: translateX(0); }
+
+  /* CONTACT */
+  #contact {
+    background: linear-gradient(135deg, #0d1117 0%, #0d1520 100%);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #contact::before {
+    content: 'BN';
+    position: absolute;
+    font-family: 'Playfair Display', serif;
+    font-size: 25vw;
+    font-weight: 900;
+    color: rgba(79,200,160,0.03);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .contact-tagline {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-style: italic;
+    color: #8b9ab0;
+    margin-bottom: 1rem;
+  }
+
+  .contact-big {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 900;
+    color: var(--cream);
+    margin-bottom: 2.5rem;
+    line-height: 1.1;
+  }
+
+  .contact-big em { color: var(--gold); font-style: italic; }
+
+  .contact-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .contact-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .contact-link:hover { color: var(--gold); }
+
+  .contact-divider {
+    color: rgba(201,168,76,0.3);
+    font-size: 0.5rem;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid rgba(201,168,76,0.1);
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes rotate {
+    from { transform: translate(-50%,-50%) rotate(0deg); }
+    to { transform: translate(-50%,-50%) rotate(360deg); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.4); border-radius: 2px; }
+
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .edu-grid { grid-template-columns: 1fr; }
+    .skills-grid { grid-template-columns: 1fr 1fr; }
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1.2rem; }
+    .container { padding: 0 1.5rem; }
+    .hero-left { padding: 7rem 1.5rem 4rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <div class="nav-logo">Benjamin Nguyen</div>
+  <ul class="nav-links">
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">USC Marshall · Class of 2027</div>
+    <h1 class="hero-name">Benjamin<br><em>Nguyen</em></h1>
+    <p class="hero-desc">Business analytics student, founder, and operator. I turn data into decisions and ideas into businesses.</p>
+    <div class="hero-cta">
+      <a href="mailto:nguyenbe@usc.edu" class="btn-primary">Get in Touch</a>
+      <a href="#experience" class="btn-ghost">View Work</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-graphic">
+      <div class="circle-ring"></div>
+      <div class="circle-ring"></div>
+      <div class="circle-ring"></div>
+      <div class="stat-card">
+        <div class="stat-num">$50K+</div>
+        <div class="stat-label">Business Revenue</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3.8</div>
+        <div class="stat-label">GPA</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">100+</div>
+        <div class="stat-label">Club Members Founded</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Experience</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="exp-grid">
+      <div class="exp-item reveal">
+        <div>
+          <div class="exp-company">Grace Cleaning</div>
+          <div class="exp-role">Founder / Operator</div>
+          <ul class="exp-bullets">
+            <li>Scaled a local service business to $50K+ in revenue through pricing and channel optimization</li>
+            <li>Analyzed job-level unit economics to refine service mix and promotional pricing</li>
+            <li>Built KPI dashboards tracking bookings, retention, and fulfillment performance</li>
+          </ul>
+          <span class="exp-tag">Entrepreneurship</span>
+        </div>
+        <div class="exp-meta">
+          <div class="exp-date">Dec. 2024 – Current</div>
+          <div class="exp-location">Phoenix, AZ</div>
+        </div>
+      </div>
+
+      <div class="exp-item reveal">
+        <div>
+          <div class="exp-company">Amazon</div>
+          <div class="exp-role">Incoming Operations Analyst Intern</div>
+          <ul class="exp-bullets">
+            <li>Drive data-driven process improvements in high-volume operations</li>
+            <li>Support frontline execution by monitoring KPIs and coordinating fulfillment workflows</li>
+          </ul>
+          <span class="exp-tag">Operations</span>
+        </div>
+        <div class="exp-meta">
+          <div class="exp-date">Aug. 2023 – Jan. 2025</div>
+          <div class="exp-location">Remote</div>
+        </div>
+      </div>
+
+      <div class="exp-item reveal">
+        <div>
+          <div class="exp-company">Premiere Venture Capitalist Academy · USC</div>
+          <div class="exp-role">VC Associate / Director of Finance</div>
+          <ul class="exp-bullets">
+            <li>Evaluated markets, pricing strategies, and unit economics for early-stage startups</li>
+            <li>Presented competitive insights and investment theses to VC mentors</li>
+          </ul>
+          <span class="exp-tag">Venture Capital</span>
+        </div>
+        <div class="exp-meta">
+          <div class="exp-date">Oct. 2025 – Present</div>
+          <div class="exp-location">Los Angeles, CA</div>
+        </div>
+      </div>
+
+      <div class="exp-item reveal">
+        <div>
+          <div class="exp-company">Willow Voice – YC Backed</div>
+          <div class="exp-role">Growth Intern</div>
+          <ul class="exp-bullets">
+            <li>Supported growth at a voice dictation startup by testing and refining content driving product adoption</li>
+            <li>Analyzed voice dictation use cases and user feedback to improve messaging, positioning, and content clarity</li>
+          </ul>
+          <span class="exp-tag">Growth · YC</span>
+        </div>
+        <div class="exp-meta">
+          <div class="exp-date">Jun. – Aug. 2024</div>
+          <div class="exp-location">Remote</div>
+        </div>
+      </div>
+
+      <div class="exp-item reveal">
+        <div>
+          <div class="exp-company">Tiehub · "Origin Weekend" Startup Competition</div>
+          <div class="exp-role">Product Analyst</div>
+          <ul class="exp-bullets">
+            <li>Won "Best Pitch" for a computer-vision product guiding waste sorting decisions</li>
+            <li>Built MVP, landing page, and pitch deck within 60 hours using live user feedback</li>
+          </ul>
+          <span class="exp-tag">🏆 Best Pitch</span>
+        </div>
+        <div class="exp-meta">
+          <div class="exp-date">Sep. 2025</div>
+          <div class="exp-location">USC</div>
+        </div>
+      </div>
+
+      <div class="exp-item reveal">
+        <div>
+          <div class="exp-company">Core Consulting Group · El Camino College</div>
+          <div class="exp-role">Senior Advisor / Ex-President</div>
+          <ul class="exp-bullets">
+            <li>Founded and scaled the first consulting club at El Camino College, growing membership from 0 to 100+ students</li>
+            <li>Led project teams delivering structured business analyses for real-world business clients</li>
+          </ul>
+          <span class="exp-tag">Leadership · Founder</span>
+        </div>
+        <div class="exp-meta">
+          <div class="exp-date">Aug. 2023 – Jan. 2025</div>
+          <div class="exp-location">Torrance, CA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Education</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="edu-grid reveal">
+      <div class="edu-card">
+        <div class="edu-school">University of Southern California</div>
+        <div class="edu-degree">B.S. in Business Administration (STEM) · Marshall School of Business<br>Emphasis in Business Analytics</div>
+        <div class="edu-gpa">3.8</div>
+        <div class="edu-gpa-label">GPA · Graduating Jun. 2027</div>
+        <div class="edu-courses">Financial & Managerial Accounting · Microeconomics · Finance · Communication Strategy</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-school">El Camino Community College</div>
+        <div class="edu-degree">Associate in Business Administration & Economics</div>
+        <div class="edu-gpa">3.8</div>
+        <div class="edu-gpa-label">GPA · Graduated Jun. 2025</div>
+        <div class="edu-courses">Torrance, CA</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Skills</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="skills-grid reveal">
+      <div class="skill-block">
+        <div class="skill-icon">📊</div>
+        <div class="skill-name">Data Analysis</div>
+        <div class="skill-desc">Excel (marketing & sensitivity analysis), KPI development, A/B testing</div>
+      </div>
+      <div class="skill-block">
+        <div class="skill-icon">🔍</div>
+        <div class="skill-name">Market Research</div>
+        <div class="skill-desc">Market & audience research, competitive analysis, unit economics</div>
+      </div>
+      <div class="skill-block">
+        <div class="skill-icon">📈</div>
+        <div class="skill-name">Business Strategy</div>
+        <div class="skill-desc">Pricing strategy, process improvement, channel optimization</div>
+      </div>
+      <div class="skill-block">
+        <div class="skill-icon">🖥️</div>
+        <div class="skill-name">Presentations</div>
+        <div class="skill-desc">PowerPoint, stakeholder communication, investment thesis development</div>
+      </div>
+      <div class="skill-block">
+        <div class="skill-icon">🚀</div>
+        <div class="skill-name">Growth & Product</div>
+        <div class="skill-desc">Content strategy, user feedback analysis, product positioning</div>
+      </div>
+      <div class="skill-block">
+        <div class="skill-icon">🏔️</div>
+        <div class="skill-name">Interests</div>
+        <div class="skill-desc">Climbing · Backpacking · Basketball · Board games · Hiking</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="reveal">
+      <div class="contact-tagline">Let's build something together</div>
+      <div class="contact-big">Ready to <em>connect?</em></div>
+      <div class="contact-links">
+        <a href="mailto:nguyenbe@usc.edu" class="contact-link">nguyenbe@usc.edu</a>
+        <span class="contact-divider">◆</span>
+        <a href="tel:4243011052" class="contact-link">(424) 301-1052</a>
+        <span class="contact-divider">◆</span>
+        <a href="#" class="contact-link">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-copy">© 2025 Benjamin Nguyen · Los Angeles, CA</div>
+  <div class="footer-copy">USC Marshall · Class of 2027</div>
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mouseX = 0, mouseY = 0;
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursor.style.left = mouseX + 'px';
+    cursor.style.top = mouseY + 'px';
+    ring.style.left = mouseX + 'px';
+    ring.style.top = mouseY + 'px';
+  });
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'translate(-50%,-50%) scale(1.5)';
+      ring.style.width = '50px';
+      ring.style.height = '50px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
